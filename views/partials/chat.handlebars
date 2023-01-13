@@ -1,0 +1,18 @@
+<div class="container mt-5 pt-2 bg-secondary bg-opacity-25">
+  <h2 style="color:blue">Centro de Mensajes</h2>
+  <form onsubmit="return sendMessage(this)">
+    <div class="mb-3">
+      <label for="email" class="form-label">Email: </label>
+      <input type="email" class="form-control" id="email" name="email" aria-describedby="email" required>
+    </div>
+    <div class="mb-3">
+      <label for="message" class="form-label">Message: </label>
+      <input type="text" class="form-control" id="message" name="message" aria-describedby="message" required>
+    </div>
+    <button type="submit" class="btn btn-primary">Submit</button>
+  </form>
+
+  <hr>
+  
+  <div id="messages" class="pb-2 mb-4"></div>
+</div>
