@@ -2,13 +2,9 @@ const express = require("express");
 const { createServer } = require("http");
 const socketIo = require("socket.io");
 const { engine } = require("express-handlebars");
-const { createTable } = require("./model");
-const {
-  createProducts,
-  readProducts,
-  readMessages,
-  createMessages,
-} = require("./controller");
+const { Container } = require("./controller");
+const { dbClientKnex, dbClientSqlite } = require("./config/connectToDb");
+const { productsTable, messagesTable } = require("./config/constans");
 
 const app = express();
 const server = createServer(app);
@@ -32,15 +28,12 @@ app.get("/", (req, res) => {
   res.render("products");
 });
 
-const executeOperationsDB = async () => {
-  await createTable();
-};
-
-executeOperationsDB();
+const productsContainer = new Container(dbClientKnex, productsTable);
+const messagesContainer = new Container(dbClientSqlite, messagesTable);
 
 io.on("connection", async (client) => {
-  products = (await readProducts()) || [];
-  messages = (await readMessages()) || [];
+  products = await productsContainer.readElements();
+  messages = await messagesContainer.readElements();
 
   // Send all products from products array.
   client.emit("products", products);
@@ -50,11 +43,9 @@ io.on("connection", async (client) => {
 
   // Receive a product.
   client.on("new-product", async (product) => {
-    // await createTable();
-
     // Add product in DataBase.
-    await createProducts(product);
-    products = await readProducts();
+    await productsContainer.createElement(product);
+    products = await productsContainer.readElements();
 
     // Send the new product.
     io.sockets.emit("product-added", { ...product });
@@ -65,8 +56,8 @@ io.on("connection", async (client) => {
     const date = new Date().toLocaleString();
 
     // Add message in DataBase.
-    await createMessages({ ...message, date });
-    messages = await readMessages();
+    await messagesContainer.createElement({ ...message, date });
+    messages = await messagesContainer.readElements();
 
     // Send the new message.
     io.sockets.emit("message-added", { ...message, date });

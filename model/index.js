@@ -1,17 +1,18 @@
 const { dbClientKnex, dbClientSqlite } = require("../config/connectToDb");
+const { productsTable, messagesTable } = require("../config/constans");
 
 const createTable = async () => {
   try {
-    await dbClientKnex.schema.dropTableIfExists("products");
-    await dbClientKnex.schema.createTable("products", (table) => {
+    await dbClientKnex.schema.dropTableIfExists(productsTable);
+    await dbClientKnex.schema.createTable(productsTable, (table) => {
       table.increments("id");
       table.string("name", 15).notNullable();
       table.float("price").notNullable();
       table.string("thumbnail", 40).notNullable();
     });
 
-    await dbClientSqlite.schema.dropTableIfExists("messages");
-    await dbClientSqlite.schema.createTable("messages", (table) => {
+    await dbClientSqlite.schema.dropTableIfExists(messagesTable);
+    await dbClientSqlite.schema.createTable(messagesTable, (table) => {
       table.increments("id");
       table.string("email", 50).notNullable();
       table.date("date").notNullable();
@@ -19,7 +20,10 @@ const createTable = async () => {
     });
   } catch (e) {
     console.log(e.message);
+  } finally {
+    dbClientKnex.destroy();
+    dbClientSqlite.destroy();
   }
 };
 
-module.exports = { createTable };
+createTable();
