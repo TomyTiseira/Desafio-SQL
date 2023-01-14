@@ -32,8 +32,12 @@ const productsContainer = new Container(dbClientKnex, productsTable);
 const messagesContainer = new Container(dbClientSqlite, messagesTable);
 
 io.on("connection", async (client) => {
-  products = await productsContainer.readElements();
-  messages = await messagesContainer.readElements();
+  try {
+    products = await productsContainer.readElements();
+    messages = await messagesContainer.readElements();
+  } catch (e) {
+    console.log(e.message);
+  }
 
   // Send all products from products array.
   client.emit("products", products);
@@ -43,9 +47,13 @@ io.on("connection", async (client) => {
 
   // Receive a product.
   client.on("new-product", async (product) => {
-    // Add product in DataBase.
-    await productsContainer.createElement(product);
-    products = await productsContainer.readElements();
+    try {
+      // Add product in DataBase.
+      await productsContainer.createElement(product);
+      products = await productsContainer.readElements();
+    } catch (e) {
+      console.log(e.message);
+    }
 
     // Send the new product.
     io.sockets.emit("product-added", { ...product });
@@ -55,9 +63,13 @@ io.on("connection", async (client) => {
   client.on("new-message", async (message) => {
     const date = new Date().toLocaleString();
 
-    // Add message in DataBase.
-    await messagesContainer.createElement({ ...message, date });
-    messages = await messagesContainer.readElements();
+    try {
+      // Add message in DataBase.
+      await messagesContainer.createElement({ ...message, date });
+      messages = await messagesContainer.readElements();
+    } catch (e) {
+      console.log(e.message);
+    }
 
     // Send the new message.
     io.sockets.emit("message-added", { ...message, date });
