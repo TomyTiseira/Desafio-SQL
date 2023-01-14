@@ -2,8 +2,6 @@ const socket = io();
 let flag = false;
 
 socket.on("products", (data) => {
-  // console.log(JSON.parse(data));
-  console.log(data);
   if (data.length !== 0) {
     const productList = document.getElementById("productList");
     const notProducts = document.getElementById("notProducts");
